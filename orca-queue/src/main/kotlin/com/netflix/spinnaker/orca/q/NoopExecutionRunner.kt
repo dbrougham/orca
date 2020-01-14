@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Netflix, Inc.
+ * Copyright 2020 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
@@ -19,32 +19,31 @@ package com.netflix.spinnaker.orca.q
 import com.netflix.spinnaker.orca.pipeline.ExecutionRunner
 import com.netflix.spinnaker.orca.pipeline.model.Execution
 import com.netflix.spinnaker.q.Queue
-import com.netflix.spinnaker.security.AuthenticatedRequest
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnBean(Queue::class)
-class QueueExecutionRunner(
-  private val queue: Queue
-) : ExecutionRunner {
+@ConditionalOnMissingBean(Queue::class)
+class NoopExecutionRunner() : ExecutionRunner {
+  private val log = LoggerFactory.getLogger(this.javaClass)
 
-  override fun start(execution: Execution) =
-    queue.push(StartExecution(execution))
+  init {
+    log.error("${this.javaClass.simpleName} was created - all queue operations will be NOOP'd. This is OK if the queue was intended to be disabled")
+  }
+
+  override fun start(execution: Execution) {
+  }
 
   override fun reschedule(execution: Execution) {
-    queue.push(RescheduleExecution(execution))
   }
 
   override fun restart(execution: Execution, stageId: String) {
-    queue.push(RestartStage(execution, stageId, AuthenticatedRequest.getSpinnakerUser().orElse(null)))
   }
 
   override fun unpause(execution: Execution) {
-    queue.push(ResumeExecution(execution))
   }
 
   override fun cancel(execution: Execution, user: String, reason: String?) {
-    queue.push(CancelExecution(execution, user, reason))
   }
 }
