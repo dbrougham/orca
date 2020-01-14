@@ -20,11 +20,9 @@ import com.netflix.spinnaker.orca.pipeline.ExecutionRunner
 import com.netflix.spinnaker.orca.pipeline.model.Execution
 import com.netflix.spinnaker.q.Queue
 import com.netflix.spinnaker.security.AuthenticatedRequest
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnBean(Queue::class)
 class QueueExecutionRunner(
   private val queue: Queue
 ) : ExecutionRunner {

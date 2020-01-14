@@ -16,34 +16,40 @@
 
 package com.netflix.spinnaker.orca.q
 
-import com.netflix.spinnaker.orca.pipeline.ExecutionRunner
-import com.netflix.spinnaker.orca.pipeline.model.Execution
+import com.netflix.spinnaker.q.DeadMessageCallback
+import com.netflix.spinnaker.q.Message
 import com.netflix.spinnaker.q.Queue
+import com.netflix.spinnaker.q.QueueCallback
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.stereotype.Component
+import org.threeten.extra.Minutes
+import java.time.temporal.TemporalAmount
 
-@Component
-@ConditionalOnMissingBean(Queue::class)
-class NoopExecutionRunner() : ExecutionRunner {
+class NoopQueue : Queue {
   private val log = LoggerFactory.getLogger(this.javaClass)
 
   init {
     log.error("${this.javaClass.simpleName} was created - all queue operations will be NOOP'd. This is OK if the queue was intended to be disabled")
   }
 
-  override fun start(execution: Execution) {
+  override val ackTimeout: TemporalAmount
+    get() = Minutes.of(1)
+  override val canPollMany: Boolean
+    get() = false
+  override val deadMessageHandlers: List<DeadMessageCallback>
+    get() = emptyList()
+
+  override fun ensure(message: Message, delay: TemporalAmount) {
   }
 
-  override fun reschedule(execution: Execution) {
+  override fun poll(callback: QueueCallback) {
   }
 
-  override fun restart(execution: Execution, stageId: String) {
+  override fun poll(maxMessages: Int, callback: QueueCallback) {
   }
 
-  override fun unpause(execution: Execution) {
+  override fun push(message: Message, delay: TemporalAmount) {
   }
 
-  override fun cancel(execution: Execution, user: String, reason: String?) {
+  override fun reschedule(message: Message, delay: TemporalAmount) {
   }
 }
