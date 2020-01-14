@@ -26,6 +26,7 @@ import java.time.temporal.TemporalAmount
 
 /**
  * A Noop queue do be used when no Queue bean is found (e.g. when Queue is disabled)
+ *
  */
 class NoopQueue : Queue {
   private val log = LoggerFactory.getLogger(this.javaClass)
